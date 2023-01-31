@@ -1,38 +1,16 @@
-pub type Result = core::result::Result<String, String>;
+pub mod kvp {
+    use crate::redis_engine::RedisValue;
 
-pub mod one_off_command {
-    pub fn echo(args: Vec<&str>) -> super::Result {
-        if args.len() < 1 {
-            Err("Too few arguments for \"echo\"".to_string())
-        } else if args.len() > 1 {
-            Err("Too many arguments for \"echo\"".to_string())
-        } else {
-            Ok(args[0].to_string())
-        }
-    }
-
-    pub fn ping(args: Vec<&str>) -> super::Result {
-        if args.len() == 1 {
-            self::echo(args)
-        } else if args.len() == 0 {
-            Ok("pong".to_string())
-        } else {
-            Err("Too many arguments for \"echo\"".to_string())
-        }
-    }
-}
-
-pub mod kvp_command {
-    use crate::redis_engine::{Executor, RedisValue};
     type KVPHash = std::collections::HashMap<String, RedisValue>;
+    type Result = super::super::Result;
 
-    fn set_from_redis_value(kvp: &mut KVPHash, name: &str, value: RedisValue) -> super::Result {
+    fn set_from_redis_value(kvp: &mut KVPHash, name: &str, value: RedisValue) -> Result {
         kvp.insert(name.to_string(), value);
 
         Ok("Ok".to_string())
     }
 
-    pub fn set(kvp: &mut KVPHash, args: Vec<&str>) -> super::Result {
+    pub fn set(kvp: &mut KVPHash, args: Vec<&str>) -> Result {
         // https://redis.io/commands/set/
 
         if args.len() < 2 {
@@ -46,7 +24,7 @@ pub mod kvp_command {
         }
     }
 
-    pub fn get(kvp: &mut KVPHash, args: Vec<&str>) -> super::Result {
+    pub fn get(kvp: &mut KVPHash, args: Vec<&str>) -> Result {
         // https://redis.io/commands/get/
 
         if args.len() != 1 {
@@ -60,7 +38,7 @@ pub mod kvp_command {
         }
     }
 
-    pub fn key(kvps: &mut KVPHash, args: Vec<&str>) -> super::Result {
+    pub fn key(kvps: &mut KVPHash, args: Vec<&str>) -> Result {
         /*
          * There's no command "key" in Redis. I assume "key" will return "Ok" if a key exists and "Nok" if a key
          * does not exist.
@@ -78,7 +56,7 @@ pub mod kvp_command {
         };
     }
 
-    pub fn r#type(kvps: &mut KVPHash, args: Vec<&str>) -> super::Result {
+    pub fn r#type(kvps: &mut KVPHash, args: Vec<&str>) -> Result {
         // https://redis.io/commands/type/
 
         if args.len() != 1 {
@@ -99,7 +77,7 @@ pub mod kvp_command {
     }
 
 
-    pub fn del(kvps: &mut KVPHash, args: Vec<&str>) -> super::Result {
+    pub fn del(kvps: &mut KVPHash, args: Vec<&str>) -> Result {
         // https://redis.io/commands/del/
 
         if args.len() < 1 {
@@ -118,7 +96,7 @@ pub mod kvp_command {
         Ok(format!("{}", affected))
     }
 
-    pub fn unlink(kvps_arc: &std::sync::Arc<std::sync::Mutex<KVPHash>>, args: Vec<String>) -> super::Result {
+    pub fn unlink(kvps_arc: &std::sync::Arc<std::sync::Mutex<KVPHash>>, args: Vec<String>) -> Result {
         // https://redis.io/commands/unlink/
 
         // This command is very similar to DEL: it removes the specified keys.
@@ -130,8 +108,8 @@ pub mod kvp_command {
         }
 
         let affected = std::sync::Arc::new(std::sync::Mutex::new(0));
-        let mut sub_arc = std::sync::Arc::clone(kvps_arc);
-        let mut sub_aff = std::sync::Arc::clone(&affected);
+        let sub_arc = std::sync::Arc::clone(kvps_arc);
+        let sub_aff = std::sync::Arc::clone(&affected);
 
         std::thread::spawn(move || {
             let mut kvps = sub_arc.lock().unwrap();
@@ -150,7 +128,7 @@ pub mod kvp_command {
         Ok(format!("{:?}", affected.lock().unwrap()))
     }
 
-     pub async fn expire(kvps: &std::sync::Arc<std::sync::Mutex<KVPHash>>, args: Vec<String>) -> super::Result {
+     pub async fn expire(kvps: &std::sync::Arc<std::sync::Mutex<KVPHash>>, args: Vec<String>) -> Result {
          // https://redis.io/commands/expire/
 
          // Set a timeout on key. After the timeout has expired, the key will automatically be deleted.
@@ -159,7 +137,7 @@ pub mod kvp_command {
              return Err("[ERROR]: \"expire\" requires at least two arguments!".to_string());
          }
 
-         let mut kvps_arc = std::sync::Arc::clone(&kvps);
+         let kvps_arc = std::sync::Arc::clone(&kvps);
          let cl = args[1].clone();
 
          tokio::spawn(async move {
@@ -170,7 +148,7 @@ pub mod kvp_command {
          Ok(format!("{}", 1))
      }
 
-    pub fn rename(kvps: &mut KVPHash, args: Vec<&str>) -> super::Result {
+    pub fn rename(kvps: &mut KVPHash, args: Vec<&str>) -> Result {
         // https://redis.io/commands/rename/
 
         if args.len() < 2 {
