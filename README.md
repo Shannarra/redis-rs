@@ -9,38 +9,38 @@ This is a basic engine implementation, there will be a server that is wrapping t
 There are 4 types of commands being run:
 
 1. ### Single-run commands
-    • echo
-    • ping
-    • flushall
+    - echo
+    - ping
+    - flushall
 
 2. ### Key-Value operations
-    • set
-    • get
-    • key
-    • type
-    • del
-    • unlink
-    • expire
-    • rename
+    - set
+    - get
+    - key
+    - type
+    - del
+    - unlink
+    - expire
+    - rename
 
 3. ### Lists (TODO)
-    • llen
-    • lrem
-    • lindex
-    • lpop/rpop
-    • lpush/rpush
-    • lset
+    - llen
+    - lrem
+    - lindex
+    - lpop/rpop
+    - lpush/rpush
+    - lset
 
 4. ### Hashes (TODO)
-    • hget
-    • hexists
-    • hdel
-    • hgetall
-    • hkeys
-    • hlen
-    • hmset
-    • hset
-    • hvals
+    - hget
+    - hexists
+    - hdel
+    - hgetall
+    - hkeys
+    - hlen
+    - hmset
+    - hset
+    - hvals
 
 
 ## How to use this
