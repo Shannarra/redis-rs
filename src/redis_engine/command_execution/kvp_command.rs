@@ -1,5 +1,6 @@
 pub mod kvp {
-    use crate::redis_engine::{Executor, RedisValue};
+    use crate::redis_engine::RedisValue;
+
     type KVPHash = std::collections::HashMap<String, RedisValue>;
     type Result = super::super::Result;
 
@@ -107,8 +108,8 @@ pub mod kvp {
         }
 
         let affected = std::sync::Arc::new(std::sync::Mutex::new(0));
-        let mut sub_arc = std::sync::Arc::clone(kvps_arc);
-        let mut sub_aff = std::sync::Arc::clone(&affected);
+        let sub_arc = std::sync::Arc::clone(kvps_arc);
+        let sub_aff = std::sync::Arc::clone(&affected);
 
         std::thread::spawn(move || {
             let mut kvps = sub_arc.lock().unwrap();
@@ -136,7 +137,7 @@ pub mod kvp {
              return Err("[ERROR]: \"expire\" requires at least two arguments!".to_string());
          }
 
-         let mut kvps_arc = std::sync::Arc::clone(&kvps);
+         let kvps_arc = std::sync::Arc::clone(&kvps);
          let cl = args[1].clone();
 
          tokio::spawn(async move {

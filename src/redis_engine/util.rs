@@ -27,7 +27,7 @@ impl RedisValue {
     pub fn from_str(value: &str) -> Self {
         match value.parse::<IntegerType>() {
             Ok(n) =>  RedisValue::from_int(n),
-            Err(e) => RedisValue::from_string(value.to_string())
+            Err(_) => RedisValue::from_string(value.to_string())
         }
     }
 
@@ -77,7 +77,7 @@ impl RedisValue {
 
 impl std::fmt::Debug for RedisValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "RedisValue {{");
+        write!(f, "RedisValue {{").unwrap();
 
         if self.is_int {
             write!(f, " {} (Integer) }}", self.value_t1.as_ref().unwrap())
@@ -88,10 +88,8 @@ impl std::fmt::Debug for RedisValue {
 }
 
 use std::collections::HashMap;
-use serde_json::{Result, Value};
 
 pub fn get_kvps_from_json(key: String, value: &serde_json::Value) -> HashMap<String, RedisValue> {
-
     let mut map = HashMap::new();
 
     for (k,v) in value[key].as_object().unwrap() {
@@ -136,12 +134,4 @@ pub fn get_hashes_from_json(value: &serde_json::Value) -> HashMap<String, HashMa
     }
 
     map
-}
-
-use crate::redis_engine::ExecutionContext;
-
-pub fn set_kvp(context: &mut ExecutionContext, values: Vec<&str>) -> super::command_execution::Result {
-
-
-    Ok("".to_string())
 }

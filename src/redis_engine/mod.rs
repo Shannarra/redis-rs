@@ -1,4 +1,4 @@
-use serde_json::{Result, Value};
+#![allow(unused_assignments)]
 
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
@@ -15,7 +15,8 @@ pub const DUMP_FILE_NAME: &str = "dump.my_rdb";
 pub struct ExecutionContext {
     pub key_value_pairs: Arc<Mutex<HashMap<String, RedisValue>>>,
     lists: Arc<Mutex<HashMap<String, Vec<RedisValue>>>>,
-    //std::sync::Arc<std::sync::Mutex<std::collections::HashMap<String, std::collections::HashMap<String, RedisValue>>>>
+    // Full type here is:
+    //std::sync::Arc<std::sync::Mutex<std::collections::HashMap<std::string::String, std::collections::HashMap<std::string::String, RedisValue>>>>
     hashes: Arc<Mutex<HashMap<String, HashMap<String, RedisValue>>>>
 }
 
@@ -49,7 +50,6 @@ pub struct Executor {
     pub setup_properly: bool,
 }
 
-
 pub fn setup_executor() -> Executor {
     use std::{path, fs};
 
@@ -71,7 +71,7 @@ pub fn setup_executor() -> Executor {
 
     }
 }"#;
-            fs::write(&DUMP_FILE_NAME, setup_data);
+            fs::write(&DUMP_FILE_NAME, setup_data).unwrap();
         }
     } else {
         if let Ok(text) = fs::read_to_string(&DUMP_FILE_NAME) {
@@ -112,9 +112,7 @@ impl Executor {
         }
     }
 
-    async fn exec_kvp_command(&mut self                                                 , command: &str, args: Vec<&str>) -> command_execution::Result {
-        //let mut kvp = &mut self.context.key_value_pairs.lock().unwrap();
-
+    async fn exec_kvp_command(&mut self, command: &str, args: Vec<&str>) -> command_execution::Result {
         match command {
             "set"    => { kvp::set(&mut self.context.key_value_pairs.lock().unwrap()    , args) },
             "get"    => { kvp::get(&mut self.context.key_value_pairs.lock().unwrap()    , args) },
@@ -134,13 +132,11 @@ impl Executor {
         let cmd_name = command_words.nth(0).unwrap();
         let cmd_args = command_words.collect::<Vec<_>>();
 
-        let mut execution_value = match cmd_name {
+        match cmd_name {
             "echo" | "ping" | "flushall" => self.exec_one_off(cmd_name, cmd_args),
             "set" | "get" | "key" | "type" | "del" | "unlink" | "expire" | "rename"  => self.exec_kvp_command(cmd_name, cmd_args).await,
 
             _ => todo!()
-        };
-
-        execution_value
+        }
     }
 }
