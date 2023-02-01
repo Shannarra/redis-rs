@@ -9,27 +9,29 @@ This is a basic engine implementation, there will be a server that is wrapping t
 There are 4 types of commands being run:
 
 1. ### Single-run commands
-    - echo
-    - ping
-    - flushall
+    - [echo](https://redis.io/commands/echo/)
+    - [ping](https://redis.io/commands/ping/)
+    - [flushall](https://redis.io/commands/flushall/)
 
 2. ### Key-Value operations
-    - set
-    - get
-    - key
-    - type
-    - del
-    - unlink
-    - expire
-    - rename
+    - [set](https://redis.io/commands/set/)
+    - [get](https://redis.io/commands/get/)
+    - [key](https://redis.io/commands/key/)
+    - [type](https://redis.io/commands/type/)
+    - [del](https://redis.io/commands/del/)
+    - [unlink](https://redis.io/commands/unlink/)
+    - [expire](https://redis.io/commands/expire/)
+    - [rename](https://redis.io/commands/rename/)
 
 3. ### Lists
-    - llen
-    - lrem
-    - lindex
-    - lpop/rpop
-    - lpush/rpush
-    - lset
+    - [llen](https://redis.io/commands/llen/)
+    - [lrem](https://redis.io/commands/lrem/)
+    - [lindex](https://redis.io/commands/lindex/)
+    - [lpop](https://redis.io/commands/lpop/)
+    - [rpop](https://redis.io/commands/rpop/)
+    - [lpush](https://redis.io/commands/lpush/)
+    - [rpush](https://redis.io/commands/rpush/)
+    - [lset](https://redis.io/commands/lset/)
 
 4. ### Hashes (TODO)
     - hget
@@ -42,6 +44,7 @@ There are 4 types of commands being run:
     - hset
     - hvals
 
+> You can click each link to read what each command is doing.
 
 ## How to use this
 Since this is Cargo-compatible, you just run:
