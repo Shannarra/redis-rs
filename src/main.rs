@@ -1,5 +1,5 @@
 use my_redis_server::redis_engine;
-
+use my_redis_server::*;
 /*
 {
   "key_value_pairs": {
@@ -49,9 +49,7 @@ async fn main() {
         "lpush new_list 1 2 3 2 2",
         "llen new_list",
         "lrem new_list -2 2",
-        "llen new_list"
-        // // --END LIST COMMANDS --
-
+        "llen new_list", // // --END LIST COMMANDS --
     ];
 
     let mut executor = redis_engine::setup_executor();
