@@ -51,13 +51,18 @@ impl RedisValue {
         }
     }
 
-    pub fn to_result_value(&self) -> crate::redis_engine::command_execution::Result {
+    pub fn to_string(&self) -> String {
         if self.is_int {
-            Ok(format!("{}", &self.value_t1.unwrap()))
+            format!("{}", &self.value_t1.unwrap())
         } else {
             let clone = &self.value_t2.as_ref().unwrap();
-            Ok(clone.to_string())
+            clone.to_string()
         }
+    }
+
+
+    pub fn to_result_value(&self) -> crate::redis_engine::command_execution::Result {
+        Ok(self.to_string())
     }
 
     pub fn is_a_number(&self) -> bool {

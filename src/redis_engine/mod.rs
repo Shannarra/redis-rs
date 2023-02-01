@@ -9,6 +9,7 @@ use util::*;
 mod command_execution;
 use command_execution::one_off_command::one_off;
 use command_execution::kvp_command::kvp;
+use command_execution::list_command::list;
 
 pub const DUMP_FILE_NAME: &str = "dump.my_rdb";
 
@@ -126,6 +127,20 @@ impl Executor {
         }
     }
 
+    fn exec_list_command(&mut self, command: &str, args: Vec<&str>) -> command_execution::Result {
+        match command {
+            "llen"   => { list::llen(&mut self.context.lists.lock().unwrap(), args) },
+            "lrem"   => { list::lrem(&mut self.context.lists.lock().unwrap(), args) },
+            "lindex" => { list::lindex(&mut self.context.lists.lock().unwrap(), args) },
+            "lpop"   => { list::lpop(&mut self.context.lists.lock().unwrap(), args) },
+            "rpop"   => { list::rpop(&mut self.context.lists.lock().unwrap(), args) },
+            "lpush"  => { list::lpush(&mut self.context.lists.lock().unwrap(), args) },
+            "rpush"  => { list::rpush(&mut self.context.lists.lock().unwrap(), args) },
+            "lset"   => { list::lset(&mut self.context.lists.lock().unwrap(), args) },
+            _ => { panic!("This will never be reached"); }
+        }
+    }
+
     pub async fn exec(&mut self, command: String) -> command_execution::Result {
 
         let mut command_words = command.split(" ");
@@ -135,7 +150,7 @@ impl Executor {
         match cmd_name {
             "echo" | "ping" | "flushall" => self.exec_one_off(cmd_name, cmd_args),
             "set" | "get" | "key" | "type" | "del" | "unlink" | "expire" | "rename"  => self.exec_kvp_command(cmd_name, cmd_args).await,
-
+            "llen" |"lrem" |"lindex" |"lpop" | "rpop" | "lpush" | "rpush" | "lset" => self.exec_list_command(cmd_name, cmd_args),
             _ => todo!()
         }
     }
