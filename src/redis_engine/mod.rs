@@ -131,12 +131,12 @@ impl Executor {
         match command {
             "llen"   => { list::llen(&mut self.context.lists.lock().unwrap(), args) },
             "lrem"   => { list::lrem(&mut self.context.lists.lock().unwrap(), args) },
-            "lindex" => { list::to_be_deleted(&mut self.context.lists.lock().unwrap(), args) },
-            "lpop"   => { list::to_be_deleted(&mut self.context.lists.lock().unwrap(), args) },
-            "rpop"   => { list::to_be_deleted(&mut self.context.lists.lock().unwrap(), args) },
+            "lindex" => { list::lindex(&mut self.context.lists.lock().unwrap(), args) },
+            "lpop"   => { list::lpop(&mut self.context.lists.lock().unwrap(), args) },
+            "rpop"   => { list::rpop(&mut self.context.lists.lock().unwrap(), args) },
             "lpush"  => { list::lpush(&mut self.context.lists.lock().unwrap(), args) },
-            "rpush"  => { list::to_be_deleted(&mut self.context.lists.lock().unwrap(), args) },
-            "lset"   => { list::to_be_deleted(&mut self.context.lists.lock().unwrap(), args) },
+            "rpush"  => { list::rpush(&mut self.context.lists.lock().unwrap(), args) },
+            "lset"   => { list::lset(&mut self.context.lists.lock().unwrap(), args) },
             _ => { panic!("This will never be reached"); }
         }
     }

@@ -3,12 +3,6 @@ pub mod list {
     type Result = super::super::Result;
     type List = std::collections::HashMap<String, Vec<RedisValue>>;
 
-    pub fn to_be_deleted(list: &mut List, args: Vec<&str>) -> Result {
-        println!("List contents: {:?}", list);
-
-        Err("DELETE ME".to_string())
-    }
-
     pub fn llen(list: &mut List, args: Vec<&str>) -> Result {
         // https://redis.io/commands/llen/
 
@@ -40,6 +34,34 @@ pub mod list {
         if !list.contains_key(args[0]) {
             list.insert(args[0].to_string(), vec);
         } else {
+            let mut deq = std::collections::VecDeque::from(list[args[0]].clone());
+            for v in &args[1..] {
+                deq.push_front(RedisValue::from_str(v));
+            }
+
+            let l = list.get_mut(args[0]).unwrap();
+            l.clear();
+            *l = Vec::from(deq);
+        }
+
+        Ok(format!("{}", args.len() - 1))
+    }
+
+    pub fn rpush(list: &mut List, args: Vec<&str>) -> Result {
+        // https://redis.io/commands/rpush/
+
+        if args.len() < 2 {
+            return Err("[ERROR]: At least two arguments required for \"llen\"!".to_string());
+        }
+
+        let mut vec = vec![];
+        for v in &args[1..] {
+            vec.push(RedisValue::from_str(v));
+        }
+
+        if !list.contains_key(args[0]) {
+            list.insert(args[0].to_string(), vec);
+        } else {
             for v in &args[1..] {
                 list.get_mut(args[0]).unwrap().push(RedisValue::from_str(v));
             }
@@ -49,7 +71,7 @@ pub mod list {
     }
 
     pub fn lrem(list: &mut List, args: Vec<&str>) -> Result {
-        // https://redis.io/commands/lpush/
+        // https://redis.io/commands/lrem/
 
         if args.len() < 3 {
             return Err("[ERROR]: At least three arguments required for \"llen\"!".to_string());
@@ -111,8 +133,136 @@ pub mod list {
             *mutable_list = vec_cpy.clone();
         }
 
-        println!("Vec: {:?}", list[name]);
-
         Ok(format!("{}", old_len - list[name].len()))
     }
+
+    pub fn lindex(list: &mut List, args: Vec<&str>) -> Result {
+        // https://redis.io/commands/lindex/
+
+        if args.len() < 2 {
+            return Err("[ERROR]: At least two arguments required for \"lindex\"!".to_string());
+        }
+
+        let name = args[0];
+        let mut index = 0;
+
+        if let Err(_) = args[1].parse::<i32>() {
+            return Err("[ERROR]: index value is not an integer".to_string());
+        } else {
+            index = args[1].parse::<i32>().unwrap();
+        }
+
+        if !list.contains_key(name) {
+            return Ok("(nil)".to_string());
+        }
+
+        let vec = &list[name];
+
+        if index > vec.len().try_into().unwrap() {
+            return Ok("(nil)".to_string());
+        }
+
+        if index < 0 { // -1, -2, etc..
+            index = (vec.len() as i32 + index) as i32;
+        }
+
+        Ok(format!("{:?}", vec[index as usize].to_string()))
+    }
+
+
+    pub fn lpop(list: &mut List, args: Vec<&str>) -> Result {
+        // https://redis.io/commands/lpop/
+
+        if args.len() < 1 {
+            return Err("[ERROR]: At least one argument required for \"lpop\"!".to_string());
+        }
+
+        let v = list.get_mut(args[0]).unwrap();
+
+        if args.len() > 1 {
+            let mut count = 0;
+
+            if let Err(_) = args[1].parse::<i32>() {
+                return Err("[ERROR]: count value is not an integer. Usage: lpop LISTNAME [COUNT]".to_string());
+            } else {
+                count = args[1].parse::<i32>().unwrap();
+            }
+
+            let mut r_v = vec![];
+            for _ in 0..count {
+                v.rotate_left(1);
+                r_v.push(v.pop().unwrap().to_string());
+            }
+
+            return Ok(format!("{:?}", r_v));
+        }
+
+        v.rotate_left(1);
+        Ok(format!("{}", v.pop().unwrap().to_string()))
+    }
+
+     pub fn rpop(list: &mut List, args: Vec<&str>) -> Result {
+        // https://redis.io/commands/rpop/
+
+        if args.len() < 1 {
+            return Err("[ERROR]: At least one argument required for \"rpop\"!".to_string());
+        }
+
+        let v = list.get_mut(args[0]).unwrap();
+
+        if args.len() > 1 {
+            let mut count = 0;
+
+            if let Err(_) = args[1].parse::<i32>() {
+                return Err("[ERROR]: count value is not an integer. Usage: rpop LISTNAME [COUNT]".to_string());
+            } else {
+                count = args[1].parse::<i32>().unwrap();
+            }
+
+            let mut r_v = vec![];
+            for _ in 0..count {
+                r_v.push(v.pop().unwrap().to_string());
+            }
+
+            return Ok(format!("{:?}", r_v));
+        }
+
+        Ok(format!("{}", v.pop().unwrap().to_string()))
+     }
+
+     pub fn lset(list: &mut List, args: Vec<&str>) -> Result {
+         // https://redis.io/commands/lset/
+
+         if args.len() < 3 {
+             return Err("[ERROR]: At least three arguments required for \"lset\"!".to_string());
+         }
+
+         let key     =args[0];
+         let mut index   = 0;
+         let element = args[2];
+
+         if let Err(_) = args[1].parse::<i32>() {
+             return Err("[ERROR]: index value is not an integer".to_string());
+         } else {
+             index = args[1].parse::<i32>().unwrap();
+         }
+
+         if !list.contains_key(key) {
+             return Err("[ERROR]: no such key".to_string());
+         }
+
+         let vec = list.get_mut(key).unwrap();
+
+         if index > vec.len().try_into().unwrap() {
+             return Err("[ERROR]: Index is out of list range".to_string());
+         }
+
+         // clamp the index into the bounds of the vec
+         if index < 0 { // -1, -2, etc..
+             index = (vec.len() as i32 + index) as i32;
+         }
+
+         vec[index as usize] = RedisValue::from_str(element);
+         Ok("Ok".to_string())
+     }
 }
