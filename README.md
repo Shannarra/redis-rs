@@ -23,7 +23,7 @@ There are 4 types of commands being run:
     - expire
     - rename
 
-3. ### Lists (TODO)
+3. ### Lists
     - llen
     - lrem
     - lindex
