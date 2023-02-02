@@ -33,16 +33,16 @@ There are 4 types of commands being run:
     - [rpush](https://redis.io/commands/rpush/)
     - [lset](https://redis.io/commands/lset/)
 
-4. ### Hashes (TODO)
-    - hget
-    - hexists
-    - hdel
-    - hgetall
-    - hkeys
-    - hlen
-    - hmset
-    - hset
-    - hvals
+4. ### Hashes
+    - [hget](https://redis.io/commands/hget/)
+    - [hexists](https://redis.io/commands/hexists/)
+    - [hdel](https://redis.io/commands/hdel/)
+    - [hgetall](https://redis.io/commands/hgetall/)
+    - [hkeys](https://redis.io/commands/hkeys/)
+    - [hlen](https://redis.io/commands/hlen/)
+    - [hmset](https://redis.io/commands/hmset/)
+    - [hset](https://redis.io/commands/hset/)
+    - [hvals](https://redis.io/commands/hvals/)
 
 > You can click each link to read what each command is doing.
 
