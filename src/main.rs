@@ -73,7 +73,7 @@ async fn main() {
     }
 
     let clone = executor.clone();
-    sched.add(Job::new("1/3 * * * * *".parse().unwrap(), move || {
+    sched.add(Job::new("5 * * * * *".parse().unwrap(), move || {
         clone.save();
     }));
 
