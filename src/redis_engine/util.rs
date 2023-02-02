@@ -92,6 +92,22 @@ impl std::fmt::Debug for RedisValue {
     }
 }
 
+use serde::ser::{Serialize, Serializer};
+
+impl Serialize for RedisValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        if self.is_a_number() {
+            serializer.serialize_i64(self.value_t1.unwrap())
+        } else {
+            let clone = &self.value_t2.as_ref().unwrap().clone();
+            serializer.serialize_str(clone)
+        }
+    }
+}
+
 use std::collections::HashMap;
 
 pub fn get_kvps_from_json(key: String, value: &serde_json::Value) -> HashMap<String, RedisValue> {

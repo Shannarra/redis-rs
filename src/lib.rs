@@ -33,7 +33,7 @@ mod test {
             Ok("1".to_string()),
         ];
 
-        let mut executor = crate::redis_engine::setup_executor(true);
+        let executor = crate::redis_engine::setup_executor(true);
 
         if executor.setup_properly {
             for i in 0..commands.len() {
@@ -50,7 +50,7 @@ mod test {
         "
         // To test the \"expire\" functionality place the following code at the bottom of \"main\" or
         // anywhere OTUSIDE OF a #[test] cfg!
-        let mut executor = crate::redis_engine::setup_executor(true);
+        let executor = crate::redis_engine::setup_executor(true);
         if executor.setup_properly {{
             assert_eq!(executor.exec(\"set dummy asd\".to_string()).await , Ok(\"Ok\".to_string()));
             assert_eq!(executor.exec(\"expire dummy 1\".to_string()).await, Ok(\"1\".to_string()));
@@ -82,7 +82,7 @@ mod test {
             Ok("123".to_string()),
         ];
 
-        let mut executor = crate::redis_engine::setup_executor(true);
+        let executor = crate::redis_engine::setup_executor(true);
 
         if executor.setup_properly {
             for i in 0..commands.len() {
@@ -109,7 +109,7 @@ mod test {
             Ok("3".to_string()),
         ];
 
-        let mut executor = crate::redis_engine::setup_executor(true);
+        let executor = crate::redis_engine::setup_executor(true);
 
         if executor.setup_properly {
             for i in 0..commands.len() {
@@ -122,7 +122,7 @@ mod test {
 
     #[tokio::test]
     async fn lrem_works_as_expected() {
-        let mut executor = crate::redis_engine::setup_executor(true);
+        let executor = crate::redis_engine::setup_executor(true);
 
         assert_eq!(executor.exec("rpush list hello".to_string()).await, Ok("1".to_string()));
         assert_eq!(executor.exec("rpush list foo".to_string()).await,  Ok("1".to_string()));
@@ -135,7 +135,7 @@ mod test {
 
     #[tokio::test]
     async fn lindex_works_as_expected() {
-        let mut executor = crate::redis_engine::setup_executor(true);
+        let executor = crate::redis_engine::setup_executor(true);
 
         assert_eq!(executor.exec("rpush list hello".to_string()).await, Ok("1".to_string()));
         assert_eq!(executor.exec("rpush list foo".to_string()).await,  Ok("1".to_string()));
@@ -151,7 +151,7 @@ mod test {
 
     #[tokio::test]
     async fn lpop_works_as_expected() {
-        let mut executor = crate::redis_engine::setup_executor(true);
+        let executor = crate::redis_engine::setup_executor(true);
 
         assert_eq!(executor.exec("rpush list hello".to_string()).await, Ok("1".to_string()));
         assert_eq!(executor.exec("rpush list foo".to_string()).await,  Ok("1".to_string()));
@@ -167,7 +167,7 @@ mod test {
 
     #[tokio::test]
     async fn rpop_works_as_expected() {
-        let mut executor = crate::redis_engine::setup_executor(true);
+        let executor = crate::redis_engine::setup_executor(true);
 
         assert_eq!(executor.exec("rpush list hello".to_string()).await, Ok("1".to_string()));
         assert_eq!(executor.exec("rpush list foo".to_string()).await,  Ok("1".to_string()));
@@ -183,7 +183,7 @@ mod test {
 
     #[tokio::test]
     async fn lpush_works_as_expected() {
-        let mut executor = crate::redis_engine::setup_executor(true);
+        let executor = crate::redis_engine::setup_executor(true);
 
         assert_eq!(executor.exec("lpush list hello".to_string()).await, Ok("1".to_string()));
         assert_eq!(executor.exec("lpush list foo".to_string()).await,  Ok("1".to_string()));
@@ -194,7 +194,7 @@ mod test {
 
     #[tokio::test]
     async fn lset_works_as_expected() {
-        let mut executor = crate::redis_engine::setup_executor(true);
+        let executor = crate::redis_engine::setup_executor(true);
 
         assert_eq!(executor.exec("lpush list hello".to_string()).await, Ok("1".to_string()));
         assert_eq!(executor.exec("lpush list foo".to_string()).await,  Ok("1".to_string()));
@@ -206,7 +206,7 @@ mod test {
 
     #[tokio::test]
     async fn hget_and_exists_work_as_expected() {
-        let mut executor = crate::redis_engine::setup_executor(true);
+        let executor = crate::redis_engine::setup_executor(true);
 
         assert_eq!(executor.exec("hexists hash2 name".to_string()).await, Ok("1".to_string()));
         assert_eq!(executor.exec("hexists hash1 name".to_string()).await,  Ok("1".to_string()));
@@ -219,7 +219,7 @@ mod test {
 
     #[tokio::test]
     async fn hdel_works_as_expected() {
-        let mut executor = crate::redis_engine::setup_executor(true);
+        let executor = crate::redis_engine::setup_executor(true);
 
         assert_eq!(executor.exec("hexists hash2 name".to_string()).await, Ok("1".to_string()));
         assert_eq!(executor.exec("hexists hash1 name".to_string()).await,  Ok("1".to_string()));
@@ -233,7 +233,7 @@ mod test {
 
     #[tokio::test]
     async fn hgetall_works_as_expected() {
-        let mut executor = crate::redis_engine::setup_executor(true);
+        let executor = crate::redis_engine::setup_executor(true);
 
         assert_eq!(executor.exec("hexists hash2 name".to_string()).await, Ok("1".to_string()));
         assert_eq!(executor.exec("hexists hash1 name".to_string()).await,  Ok("1".to_string()));
@@ -256,7 +256,7 @@ mod test {
 
     #[tokio::test]
     async fn hkeys_works_as_expected() {
-        let mut executor = crate::redis_engine::setup_executor(true);
+        let executor = crate::redis_engine::setup_executor(true);
 
         assert_eq!(executor.exec("hexists hash2 name".to_string()).await, Ok("1".to_string()));
         assert_eq!(executor.exec("hexists hash1 name".to_string()).await,  Ok("1".to_string()));
@@ -279,7 +279,7 @@ mod test {
 
     #[tokio::test]
     async fn hvals_works_as_expected() {
-        let mut executor = crate::redis_engine::setup_executor(true);
+        let executor = crate::redis_engine::setup_executor(true);
 
         assert_eq!(executor.exec("hexists hash2 name".to_string()).await, Ok("1".to_string()));
         assert_eq!(executor.exec("hexists hash1 name".to_string()).await,  Ok("1".to_string()));
@@ -302,7 +302,7 @@ mod test {
 
     #[tokio::test]
     async fn hlen_works_as_expected() {
-        let mut executor = crate::redis_engine::setup_executor(true);
+        let executor = crate::redis_engine::setup_executor(true);
 
         assert_eq!(executor.exec("hexists hash2 name".to_string()).await, Ok("1".to_string()));
         assert_eq!(executor.exec("hexists hash1 name".to_string()).await,  Ok("1".to_string()));
@@ -314,7 +314,7 @@ mod test {
 
     #[tokio::test]
     async fn hset_works_as_expected() {
-        let mut executor = crate::redis_engine::setup_executor(true);
+        let executor = crate::redis_engine::setup_executor(true);
 
         assert_eq!(executor.exec("hexists hash2 name".to_string()).await, Ok("1".to_string()));
         assert_eq!(executor.exec("hexists hash1 name".to_string()).await,  Ok("1".to_string()));

@@ -14,7 +14,7 @@ use command_execution::hash_command::hash;
 
 pub const DUMP_FILE_NAME: &str = "dump.my_rdb";
 pub const DEBUG_DUMP_FILE_NAME: &str = "debug_dump.my_rdb";
-
+#[derive(Clone)]
 pub struct ExecutionContext {
     pub key_value_pairs: Arc<Mutex<HashMap<String, RedisValue>>>,
     lists: Arc<Mutex<HashMap<String, Vec<RedisValue>>>>,
@@ -46,11 +46,47 @@ impl ExecutionContext {
 
         context
     }
+
+    pub fn to_string(&self) -> String {
+        use serde_json::{to_string_pretty, from_str, Value};
+
+        let kvps: &HashMap<String, RedisValue> = &self.key_value_pairs.lock().unwrap();
+        let lists: &HashMap<String, Vec<RedisValue>> = &self.lists.lock().unwrap();
+        let hashes: &HashMap<String, HashMap<String, RedisValue>> = &self.hashes.lock().unwrap();
+
+        let mut final_str = String::from("{\n\t\"key_value_pairs\": ");
+        if let Ok(s) = to_string_pretty(&kvps) {
+            final_str.push_str(&s);
+            final_str.push_str(",\n");
+        }
+        if let Ok(s) = to_string_pretty(&lists) {
+            final_str.push_str("\"lists\": ");
+            final_str.push_str(&s);
+            final_str.push_str(",\n");
+        }
+        if let Ok(s) = to_string_pretty(&hashes) {
+            final_str.push_str("\t\"hashes\": ");
+            final_str.push_str(&s);
+            final_str.push_str("\n");
+        }
+        final_str.push_str("\n}");
+
+
+        if let Ok(_) = from_str::<Value>(&final_str) {
+            // falltru
+        } else {
+            panic!("Data has been corrupted. Cannot save.");
+        }
+
+        final_str
+    }
 }
 
+#[derive(Clone)]
 pub struct Executor {
     pub context: ExecutionContext,
     pub setup_properly: bool,
+    dump_file_path: &'static str,
 }
 
 pub fn setup_executor(debug_mode: bool) -> Executor {
@@ -83,7 +119,7 @@ pub fn setup_executor(debug_mode: bool) -> Executor {
             setup_properly = true;
 
             if setup_properly {
-                return Executor { context, setup_properly }
+                return Executor { context, setup_properly, dump_file_path }
             }
         } else {
             eprintln!("[ERROR]: Cannot read dump file!");
@@ -97,7 +133,8 @@ impl Executor {
     fn error_default() -> Self {
         Self {
             context: ExecutionContext::new(),
-            setup_properly: false
+            setup_properly: false,
+            dump_file_path: ""
         }
     }
 
@@ -116,21 +153,22 @@ impl Executor {
         }
     }
 
-    async fn exec_kvp_command(&mut self, command: &str, args: Vec<&str>) -> command_execution::Result {
+    async fn exec_kvp_command(&self, command: &str, args: Vec<&str>) -> command_execution::Result {
+        let mut ctx = &self.context.key_value_pairs;
         match command {
-            "set"    => { kvp::set(&mut self.context.key_value_pairs.lock().unwrap()    , args) },
-            "get"    => { kvp::get(&mut self.context.key_value_pairs.lock().unwrap()    , args) },
-            "key"    => { kvp::key(&mut self.context.key_value_pairs.lock().unwrap()    , args) },
-            "type"   => { kvp::r#type(&mut self.context.key_value_pairs.lock().unwrap() , args) },
-            "del"    => { kvp::del(&mut self.context.key_value_pairs.lock().unwrap()    , args) },
-            "unlink" => { kvp::unlink(&mut self.context.key_value_pairs                 , args.iter().map(|x| x.to_string()).collect()) },
-            "expire" => { kvp::expire(&mut self.context.key_value_pairs                 , args.iter().map(|x| x.to_string()).collect()).await },
-            "rename" => { kvp::rename(&mut self.context.key_value_pairs.lock().unwrap() , args) },
+            "set"    => { kvp::set(&mut ctx.lock().unwrap()    , args) },
+            "get"    => { kvp::get(&mut ctx.lock().unwrap()    , args) },
+            "key"    => { kvp::key(&mut ctx.lock().unwrap()    , args) },
+            "type"   => { kvp::r#type(&mut ctx.lock().unwrap() , args) },
+            "del"    => { kvp::del(&mut ctx.lock().unwrap()    , args) },
+            "unlink" => { kvp::unlink(&mut ctx                 , args.iter().map(|x| x.to_string()).collect()) },
+            "expire" => { kvp::expire(&mut ctx                 , args.iter().map(|x| x.to_string()).collect()).await },
+            "rename" => { kvp::rename(&mut ctx.lock().unwrap() , args) },
             _ => { panic!("This will never be reached"); }
         }
     }
 
-    fn exec_list_command(&mut self, command: &str, args: Vec<&str>) -> command_execution::Result {
+    fn exec_list_command(&self, command: &str, args: Vec<&str>) -> command_execution::Result {
         match command {
             "llen"   => { list::llen(&mut self.context.lists.lock().unwrap(), args) },
             "lrem"   => { list::lrem(&mut self.context.lists.lock().unwrap(), args) },
@@ -144,7 +182,7 @@ impl Executor {
         }
     }
 
-    fn exec_hash_command(&mut self, command: &str, args: Vec<&str>) -> command_execution::Result {
+    fn exec_hash_command(&self, command: &str, args: Vec<&str>) -> command_execution::Result {
         match command {
             "hget"    => { hash::hget(&mut self.context.hashes.lock().unwrap(), args) },
             "hexists" => { hash::hexists(&mut self.context.hashes.lock().unwrap(), args) },
@@ -159,7 +197,7 @@ impl Executor {
         }
     }
 
-    pub async fn exec(&mut self, command: String) -> command_execution::Result {
+    pub async fn exec(&self, command: String) -> command_execution::Result {
         let mut command_words = command.split(" ");
         let cmd_name = command_words.nth(0).unwrap();
         let cmd_args = command_words.collect::<Vec<_>>();
@@ -178,6 +216,20 @@ impl Executor {
                 self.exec_hash_command(cmd_name, cmd_args)
             },
             _ => Err(format!("Unknown command \"{cmd_name}\" provided."))
+        }
+    }
+
+    pub fn save(&self) {
+        let string_value = self.context.to_string();
+
+        let path = std::path::Path::new(&self.dump_file_path);
+        if !path.exists() {
+            if let Err(_) = std::fs::File::create(&self.dump_file_path) {
+                eprintln!("[ERROR]: Cannot create a dump file!");
+            }
+        } else {
+            std::fs::write(&self.dump_file_path, string_value).unwrap();
+            println!("Saved");
         }
     }
 }
