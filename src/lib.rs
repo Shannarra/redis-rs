@@ -33,7 +33,7 @@ mod test {
             Ok("1".to_string()),
         ];
 
-        let mut executor = crate::redis_engine::setup_executor();
+        let mut executor = crate::redis_engine::setup_executor(true);
 
         if executor.setup_properly {
             for i in 0..commands.len() {
@@ -50,7 +50,7 @@ mod test {
         "
         // To test the \"expire\" functionality place the following code at the bottom of \"main\" or
         // anywhere OTUSIDE OF a #[test] cfg!
-        let mut executor = crate::redis_engine::setup_executor();
+        let mut executor = crate::redis_engine::setup_executor(true);
         if executor.setup_properly {{
             assert_eq!(executor.exec(\"set dummy asd\".to_string()).await , Ok(\"Ok\".to_string()));
             assert_eq!(executor.exec(\"expire dummy 1\".to_string()).await, Ok(\"1\".to_string()));
@@ -82,7 +82,7 @@ mod test {
             Ok("123".to_string()),
         ];
 
-        let mut executor = crate::redis_engine::setup_executor();
+        let mut executor = crate::redis_engine::setup_executor(true);
 
         if executor.setup_properly {
             for i in 0..commands.len() {
@@ -109,7 +109,7 @@ mod test {
             Ok("3".to_string()),
         ];
 
-        let mut executor = crate::redis_engine::setup_executor();
+        let mut executor = crate::redis_engine::setup_executor(true);
 
         if executor.setup_properly {
             for i in 0..commands.len() {
@@ -122,7 +122,7 @@ mod test {
 
     #[tokio::test]
     async fn lrem_works_as_expected() {
-        let mut executor = crate::redis_engine::setup_executor();
+        let mut executor = crate::redis_engine::setup_executor(true);
 
         assert_eq!(executor.exec("rpush list hello".to_string()).await, Ok("1".to_string()));
         assert_eq!(executor.exec("rpush list foo".to_string()).await,  Ok("1".to_string()));
@@ -135,7 +135,7 @@ mod test {
 
     #[tokio::test]
     async fn lindex_works_as_expected() {
-        let mut executor = crate::redis_engine::setup_executor();
+        let mut executor = crate::redis_engine::setup_executor(true);
 
         assert_eq!(executor.exec("rpush list hello".to_string()).await, Ok("1".to_string()));
         assert_eq!(executor.exec("rpush list foo".to_string()).await,  Ok("1".to_string()));
@@ -151,7 +151,7 @@ mod test {
 
     #[tokio::test]
     async fn lpop_works_as_expected() {
-        let mut executor = crate::redis_engine::setup_executor();
+        let mut executor = crate::redis_engine::setup_executor(true);
 
         assert_eq!(executor.exec("rpush list hello".to_string()).await, Ok("1".to_string()));
         assert_eq!(executor.exec("rpush list foo".to_string()).await,  Ok("1".to_string()));
@@ -167,7 +167,7 @@ mod test {
 
     #[tokio::test]
     async fn rpop_works_as_expected() {
-        let mut executor = crate::redis_engine::setup_executor();
+        let mut executor = crate::redis_engine::setup_executor(true);
 
         assert_eq!(executor.exec("rpush list hello".to_string()).await, Ok("1".to_string()));
         assert_eq!(executor.exec("rpush list foo".to_string()).await,  Ok("1".to_string()));
@@ -183,7 +183,7 @@ mod test {
 
     #[tokio::test]
     async fn lpush_works_as_expected() {
-        let mut executor = crate::redis_engine::setup_executor();
+        let mut executor = crate::redis_engine::setup_executor(true);
 
         assert_eq!(executor.exec("lpush list hello".to_string()).await, Ok("1".to_string()));
         assert_eq!(executor.exec("lpush list foo".to_string()).await,  Ok("1".to_string()));
@@ -194,7 +194,7 @@ mod test {
 
     #[tokio::test]
     async fn lset_works_as_expected() {
-        let mut executor = crate::redis_engine::setup_executor();
+        let mut executor = crate::redis_engine::setup_executor(true);
 
         assert_eq!(executor.exec("lpush list hello".to_string()).await, Ok("1".to_string()));
         assert_eq!(executor.exec("lpush list foo".to_string()).await,  Ok("1".to_string()));
@@ -202,6 +202,127 @@ mod test {
         assert_eq!(executor.exec("lset list -2 hello3".to_string()).await,  Ok("Ok".to_string()));
         assert_eq!(executor.exec("llen list".to_string()).await,  Ok("2".to_string()));
         assert_eq!(executor.exec("lindex list 0".to_string()).await,  Ok("\"hello3\"".to_string()));
+    }
 
+    #[tokio::test]
+    async fn hget_and_exists_work_as_expected() {
+        let mut executor = crate::redis_engine::setup_executor(true);
+
+        assert_eq!(executor.exec("hexists hash2 name".to_string()).await, Ok("1".to_string()));
+        assert_eq!(executor.exec("hexists hash1 name".to_string()).await,  Ok("1".to_string()));
+        assert_eq!(executor.exec("hexists hash3 asd".to_string()).await, Ok("0".to_string()));
+        assert_eq!(executor.exec("hget hash1 name".to_string()).await,  Ok("Petar".to_string()));
+        assert_eq!(executor.exec("hexists hash1 age".to_string()).await,  Ok("1".to_string()));
+        assert_eq!(executor.exec("hget hash1 age".to_string()).await,  Ok("22".to_string()));
+        assert_eq!(executor.exec("hget hash2 name".to_string()).await,  Ok("this is a new hash".to_string()));
+    }
+
+    #[tokio::test]
+    async fn hdel_works_as_expected() {
+        let mut executor = crate::redis_engine::setup_executor(true);
+
+        assert_eq!(executor.exec("hexists hash2 name".to_string()).await, Ok("1".to_string()));
+        assert_eq!(executor.exec("hexists hash1 name".to_string()).await,  Ok("1".to_string()));
+        assert_eq!(executor.exec("hexists hash1 age".to_string()).await, Ok("1".to_string()));
+        assert_eq!(executor.exec("hdel hash1 name age".to_string()).await,  Ok("2".to_string()));
+        assert_eq!(executor.exec("hexists hash1 name".to_string()).await,  Ok("0".to_string()));
+        assert_eq!(executor.exec("hexists hash1 age".to_string()).await, Ok("0".to_string()));
+        assert_eq!(executor.exec("hdel hash2 name".to_string()).await,  Ok("1".to_string()));
+        assert_eq!(executor.exec("hexists hash2 name".to_string()).await, Ok("0".to_string()));
+    }
+
+    #[tokio::test]
+    async fn hgetall_works_as_expected() {
+        let mut executor = crate::redis_engine::setup_executor(true);
+
+        assert_eq!(executor.exec("hexists hash2 name".to_string()).await, Ok("1".to_string()));
+        assert_eq!(executor.exec("hexists hash1 name".to_string()).await,  Ok("1".to_string()));
+        assert_eq!(executor.exec("hexists hash1 age".to_string()).await, Ok("1".to_string()));
+
+        // this is needed since hgetall will return the key-values array in an arbitrary element order
+        // to see why read more here: https://doc.rust-lang.org/std/collections/struct.HashMap.html#method.iter
+        let val = executor.exec("hgetall hash1".to_string()).await;
+
+        if val ==  Ok("[\"age\", \"22\", \"name\", \"Petar\"]".to_string()) ||
+            val ==  Ok("[\"name\", \"Petar\", \"age\", \"22\"]".to_string()) {
+                assert!(true);
+            } else {
+                assert!(false);
+            }
+
+        assert_eq!(executor.exec("hgetall hash2".to_string()).await,  Ok("[\"name\", \"this is a new hash\"]".to_string()));
+        assert_eq!(executor.exec("hgetall doesnt_exist".to_string()).await,  Ok("[]".to_string()));
+    }
+
+    #[tokio::test]
+    async fn hkeys_works_as_expected() {
+        let mut executor = crate::redis_engine::setup_executor(true);
+
+        assert_eq!(executor.exec("hexists hash2 name".to_string()).await, Ok("1".to_string()));
+        assert_eq!(executor.exec("hexists hash1 name".to_string()).await,  Ok("1".to_string()));
+        assert_eq!(executor.exec("hexists hash1 age".to_string()).await, Ok("1".to_string()));
+
+        // this is needed since hkeys will return the key-values array in an arbitrary element order
+        // to see why read more here: https://doc.rust-lang.org/std/collections/struct.HashMap.html#method.iter
+        let val = executor.exec("hkeys hash1".to_string()).await;
+
+        if val ==  Ok("[\"age\", \"name\"]".to_string()) ||
+            val ==  Ok("[\"name\", \"age\"]".to_string()) {
+                assert!(true);
+            } else {
+                assert!(false);
+            }
+
+        assert_eq!(executor.exec("hkeys hash2".to_string()).await,  Ok("[\"name\"]".to_string()));
+        assert_eq!(executor.exec("hkeys doesnt_exist".to_string()).await,  Ok("[]".to_string()));
+    }
+
+    #[tokio::test]
+    async fn hvals_works_as_expected() {
+        let mut executor = crate::redis_engine::setup_executor(true);
+
+        assert_eq!(executor.exec("hexists hash2 name".to_string()).await, Ok("1".to_string()));
+        assert_eq!(executor.exec("hexists hash1 name".to_string()).await,  Ok("1".to_string()));
+        assert_eq!(executor.exec("hexists hash1 age".to_string()).await, Ok("1".to_string()));
+
+        // this is needed since hkeys will return the key-values array in an arbitrary element order
+        // to see why read more here: https://doc.rust-lang.org/std/collections/struct.HashMap.html#method.iter
+        let val = executor.exec("hvals hash1".to_string()).await;
+
+        if val ==  Ok("[\"22\", \"Petar\"]".to_string()) ||
+            val ==  Ok("[\"Petar\", \"22\"]".to_string()) {
+                assert!(true);
+            } else {
+                assert!(false);
+            }
+
+        assert_eq!(executor.exec("hvals hash2".to_string()).await,  Ok("[\"this is a new hash\"]".to_string()));
+        assert_eq!(executor.exec("hvals doesnt_exist".to_string()).await,  Ok("[]".to_string()));
+    }
+
+    #[tokio::test]
+    async fn hlen_works_as_expected() {
+        let mut executor = crate::redis_engine::setup_executor(true);
+
+        assert_eq!(executor.exec("hexists hash2 name".to_string()).await, Ok("1".to_string()));
+        assert_eq!(executor.exec("hexists hash1 name".to_string()).await,  Ok("1".to_string()));
+        assert_eq!(executor.exec("hexists hash1 age".to_string()).await, Ok("1".to_string()));
+        assert_eq!(executor.exec("hlen hash1".to_string()).await,  Ok("2".to_string()));
+        assert_eq!(executor.exec("hlen hash2".to_string()).await,  Ok("1".to_string()));
+        assert_eq!(executor.exec("hlen doesnt_exist".to_string()).await,  Ok("0".to_string()));
+    }
+
+    #[tokio::test]
+    async fn hset_works_as_expected() {
+        let mut executor = crate::redis_engine::setup_executor(true);
+
+        assert_eq!(executor.exec("hexists hash2 name".to_string()).await, Ok("1".to_string()));
+        assert_eq!(executor.exec("hexists hash1 name".to_string()).await,  Ok("1".to_string()));
+        assert_eq!(executor.exec("hexists hash1 age".to_string()).await, Ok("1".to_string()));
+        assert_eq!(executor.exec("hmset hash1 name \"John\" age 25".to_string()).await,  Ok("2".to_string()));
+        assert_eq!(executor.exec("hset hash2 newfield 69".to_string()).await,  Ok("1".to_string()));
+        assert_eq!(executor.exec("hlen hash2".to_string()).await,  Ok("2".to_string()));
+        assert_eq!(executor.exec("hget hash2 newfield".to_string()).await,  Ok("69".to_string()));
+        assert_eq!(executor.exec("hget hash1 name".to_string()).await,  Ok("\"John\"".to_string()));
     }
 }

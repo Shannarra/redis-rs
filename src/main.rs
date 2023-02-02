@@ -49,10 +49,15 @@ async fn main() {
         "lpush new_list 1 2 3 2 2",
         "llen new_list",
         "lrem new_list -2 2",
-        "llen new_list", // // --END LIST COMMANDS --
+        "llen new_list",
+        // // --END LIST COMMANDS --
+        // // --START HASH COMMANDS --
+        "hget hash1 name",
+        // // --END HASH COMMANDS --
+
     ];
 
-    let mut executor = redis_engine::setup_executor();
+    let mut executor = redis_engine::setup_executor(false);
 
     if executor.setup_properly {
         println!("Executor setup :)");
