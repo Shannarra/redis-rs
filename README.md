@@ -46,6 +46,11 @@ There are 4 types of commands being run:
 
 > You can click each link to read what each command is doing.
 
+5. ### Autosave
+Every 300 seconds (5 minutes) all of the data will be automatically persisted to the respective dump file (`dump.my_rdb` or `debug_dump.my_rdb` depending on the mode you spin the executor in.
+
+Saving is being done in the background so you can modify your redis console or data as much as you'd want.
+
 ## How to use this
 Since this is Cargo-compatible, you just run:
 ```sh
