@@ -53,10 +53,9 @@ There are 4 types of commands being run:
       <li><a href="https://redis.io/commands/hvals/">hvals</li>
     </ul>
 
-
-
     1.5  __Autosave__
         Every 300 seconds (5 minutes) all of the data will be automatically persisted to the respective dump file (`dump.my_rdb` or `debug_dump.my_rdb` depending on the mode you spin the executor in.
+
         Saving is being done in the background so you can modify your redis console or data as much as you'd want.
 
 > You can click each link to read what each command is doing.
