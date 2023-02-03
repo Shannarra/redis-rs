@@ -1,48 +1,25 @@
 {
 	"key_value_pairs": {
-  "kekw": "hi",
-  "testvar": "this_is_a_test_string",
-  "henlo": 123
+  "name": "Petar",
+  "hi": "hello",
+  "age": 22
 },
 "lists": {
-  "new_list": [
-    2,
-    2,
-    3,
-    2,
-    1,
-    2,
-    2,
-    3,
-    2,
-    1,
-    2,
-    2,
-    3,
-    2,
-    1,
-    3,
-    1,
-    3,
-    1,
-    3,
-    1,
-    3,
-    1,
-    3,
-    1,
-    1,
-    3
+  "list2": [
+    "newvalue"
+  ],
+  "list1": [
+    "value1",
+    "value2"
   ]
 },
 	"hashes": {
-  "hash1": {
-    "filed_int": 69,
-    "myfield": "new_text_value"
-  },
   "hash2": {
-    "newfield": 69,
-    "field_no_3": 420
+    "name": "this is a new hash"
+  },
+  "hash1": {
+    "age": 22,
+    "name": "Petar"
   }
 }
 

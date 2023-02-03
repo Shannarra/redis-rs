@@ -316,6 +316,7 @@ dependencies = [
  "job_scheduler",
  "serde",
  "serde_json",
+ "signal-hook",
  "tokio",
 ]
 
@@ -467,6 +468,17 @@ dependencies = [
  "itoa",
  "ryu",
  "serde",
+]
+
+[[package]]
+name = "signal-hook"
+version = "0.3.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a253b5e89e2698464fc26b545c9edceb338e18a89effeeecfea192c3025be29d"
+dependencies = [
+ "cc",
+ "libc",
+ "signal-hook-registry",
 ]
 
 [[package]]
