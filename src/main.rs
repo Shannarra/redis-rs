@@ -4,22 +4,13 @@ use std::io::{Read, Write};
 #[tokio::main]
 async fn exec_redis_engine(executor: &redis_engine::Executor, command: String, response: &mut String) {
     if executor.setup_properly {
-        //println!("{:?}", &executor.exec(command.to_string()).await);
-
         let resp = executor.exec(command.trim().to_string()).await;
         if let Err(x) = resp {
             response.push_str(&x);
         } else {
             response.push_str(&resp.unwrap());
         }
-
-        //let mut st = String::new();
-        //let stdin = std::io::stdin();
-
-        //stdin.read_line(&mut st).unwrap();
-        //println!("{:?}", executor.exec(st.trim().to_string()).await);
     }
-    //}
 }
 
 fn handle_client(mut stream: std::net::TcpStream) {
