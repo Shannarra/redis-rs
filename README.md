@@ -75,6 +75,8 @@ lsof -ti tcp:1234 | xargs kill -9
 ```
 This will kill all processes on the given port and free it up, so you can run the server on the port you'd like. :)
 
+> Pressing CTRL+C or CTRL+Z will terminate the server, saving the data beforehand.
+
 ## Testing
 There are a number of tests testing EACH command, run those by doing:
 ```sh
