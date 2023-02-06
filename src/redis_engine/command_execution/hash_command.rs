@@ -1,3 +1,5 @@
+#![allow(clippy::if_same_then_else)] // for lines 18 and 20
+
 pub mod hash {
     use crate::redis_engine::RedisValue;
     type Result = super::super::Result;
@@ -19,7 +21,7 @@ pub mod hash {
             return Ok("(nil)".to_string());
         }
 
-        Ok(format!("{}", hash[key][field].to_string()))
+        Ok(hash[key][field].to_string())
     }
 
     pub fn hexists(hash: &mut Hash, args: Vec<&str>) -> Result {
@@ -56,7 +58,7 @@ pub mod hash {
         }
 
         for f in &args[1..] {
-            if let Some(_) = hash.get_mut(key).unwrap().remove(&f.to_string()) {
+            if hash.get_mut(key).unwrap().remove(&f.to_string()).is_some() {
                 affected+=1;
             }
         }
@@ -67,7 +69,7 @@ pub mod hash {
     pub fn hgetall(hash: &mut Hash, args: Vec<&str>) -> Result {
         // https://redis.io/commands/hgetall/
 
-        if args.len() < 1 {
+        if args.is_empty() {
             return Err("[ERROR]: At least two arguments required for \"hgetall\"!".to_string());
         }
 
@@ -89,7 +91,7 @@ pub mod hash {
     pub fn hkeys(hash: &mut Hash, args: Vec<&str>) -> Result {
         // https://redis.io/commands/hkeys/
 
-        if args.len() < 1 {
+        if args.is_empty() {
             return Err("[ERROR]: At least one argument required for \"hkeys\"!".to_string());
         }
 
@@ -114,7 +116,7 @@ pub mod hash {
     pub fn hvals(hash: &mut Hash, args: Vec<&str>) -> Result {
         // https://redis.io/commands/hvals/
 
-        if args.len() < 1 {
+        if args.is_empty() {
             return Err("[ERROR]: At least one argument required for \"hvals\"!".to_string());
         }
 
@@ -138,7 +140,7 @@ pub mod hash {
     pub fn hlen(hash: &mut Hash, args: Vec<&str>) -> Result {
         // https://redis.io/commands/hlen/
 
-        if args.len() < 1 {
+        if args.is_empty() {
             return Err("[ERROR]: At least one argument required for \"hlen\"!".to_string());
         }
 

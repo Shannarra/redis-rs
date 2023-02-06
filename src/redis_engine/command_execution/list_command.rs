@@ -1,3 +1,5 @@
+#![allow(clippy::comparison_chain)]
+
 pub mod list {
     use crate::redis_engine::RedisValue;
     type Result = super::super::Result;
@@ -81,7 +83,7 @@ pub mod list {
         let mut count = 0;
         let key = args[2];
 
-        if let Err(_) = args[1].parse::<i32>() {
+        if args[1].parse::<i32>().is_err() {
             return Err(format!("Second argument of \"lrem\" MUST be a whole number! Got \"{}\"", args[1]));
         } else {
             count = args[1].parse::<i32>().unwrap();
@@ -146,7 +148,7 @@ pub mod list {
         let name = args[0];
         let mut index = 0;
 
-        if let Err(_) = args[1].parse::<i32>() {
+        if args[1].parse::<i32>().is_err() {
             return Err("[ERROR]: index value is not an integer".to_string());
         } else {
             index = args[1].parse::<i32>().unwrap();
@@ -173,16 +175,20 @@ pub mod list {
     pub fn lpop(list: &mut List, args: Vec<&str>) -> Result {
         // https://redis.io/commands/lpop/
 
-        if args.len() < 1 {
+        if args.is_empty() {
             return Err("[ERROR]: At least one argument required for \"lpop\"!".to_string());
         }
 
         let v = list.get_mut(args[0]).unwrap();
 
+        if v.is_empty() {
+            return Err(format!("[ERROR]: List \"{}\" is empty!", args[0]));
+        }
+
         if args.len() > 1 {
             let mut count = 0;
 
-            if let Err(_) = args[1].parse::<i32>() {
+            if args[1].parse::<i32>().is_err() {
                 return Err("[ERROR]: count value is not an integer. Usage: lpop LISTNAME [COUNT]".to_string());
             } else {
                 count = args[1].parse::<i32>().unwrap();
@@ -198,22 +204,26 @@ pub mod list {
         }
 
         v.rotate_left(1);
-        Ok(format!("{}", v.pop().unwrap().to_string()))
+        Ok(v.pop().unwrap().to_string())
     }
 
      pub fn rpop(list: &mut List, args: Vec<&str>) -> Result {
         // https://redis.io/commands/rpop/
 
-        if args.len() < 1 {
+        if args.is_empty() {
             return Err("[ERROR]: At least one argument required for \"rpop\"!".to_string());
         }
 
         let v = list.get_mut(args[0]).unwrap();
 
+        if v.is_empty() {
+            return Err(format!("[ERROR]: List \"{}\" is empty!", args[0]));
+        }
+
         if args.len() > 1 {
             let mut count = 0;
 
-            if let Err(_) = args[1].parse::<i32>() {
+            if args[1].parse::<i32>().is_err() {
                 return Err("[ERROR]: count value is not an integer. Usage: rpop LISTNAME [COUNT]".to_string());
             } else {
                 count = args[1].parse::<i32>().unwrap();
@@ -227,7 +237,7 @@ pub mod list {
             return Ok(format!("{:?}", r_v));
         }
 
-        Ok(format!("{}", v.pop().unwrap().to_string()))
+        Ok(v.pop().unwrap().to_string())
      }
 
      pub fn lset(list: &mut List, args: Vec<&str>) -> Result {
@@ -241,7 +251,7 @@ pub mod list {
          let mut index   = 0;
          let element = args[2];
 
-         if let Err(_) = args[1].parse::<i32>() {
+         if args[1].parse::<i32>().is_err() {
              return Err("[ERROR]: index value is not an integer".to_string());
          } else {
              index = args[1].parse::<i32>().unwrap();

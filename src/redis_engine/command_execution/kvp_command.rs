@@ -1,3 +1,5 @@
+#![allow(clippy::comparison_chain)]
+
 pub mod kvp {
     use crate::redis_engine::RedisValue;
 
@@ -49,11 +51,11 @@ pub mod kvp {
             return Err("[ERROR]: \"key\" requires only one argument!".to_string());
         }
 
-        return if kvps.contains_key(args[0]) {
+        if kvps.contains_key(args[0]) {
             Ok("Ok".to_string())
         } else {
             Ok("Nok".to_string())
-        };
+        }
     }
 
     pub fn r#type(kvps: &mut KVPHash, args: Vec<&str>) -> Result {
@@ -80,16 +82,15 @@ pub mod kvp {
     pub fn del(kvps: &mut KVPHash, args: Vec<&str>) -> Result {
         // https://redis.io/commands/del/
 
-        if args.len() < 1 {
+        if args.is_empty() {
             return Err("[ERROR]: \"del\" requires at least one argument!".to_string());
         }
 
         let mut affected = 0;
 
-        for i in args {
-            if kvps.contains_key(i) {
-                kvps.remove(i);
-                affected += 1;
+        for k in args {
+            if kvps.contains_key(k) && kvps.remove(k).is_some() {
+                    affected+=1;
             }
         }
 
@@ -103,7 +104,7 @@ pub mod kvp {
         // Just like DEL a key is ignored if it does not exist, but it does the
         // job in a separate thread
 
-        if args.len() < 1 {
+        if args.is_empty() {
             return Err("[ERROR]: \"unlink\" requires at least one argument!".to_string());
         }
 
@@ -128,7 +129,7 @@ pub mod kvp {
         Ok(format!("{:?}", affected.lock().unwrap()))
     }
 
-     pub async fn expire(kvps: &std::sync::Arc<std::sync::Mutex<KVPHash>>, args: Vec<String>) -> Result {
+     pub fn expire(_: &std::sync::Arc<std::sync::Mutex<KVPHash>>, args: Vec<String>) -> Result {
          // https://redis.io/commands/expire/
 
          // Set a timeout on key. After the timeout has expired, the key will automatically be deleted.
@@ -137,13 +138,25 @@ pub mod kvp {
              return Err("[ERROR]: \"expire\" requires at least two arguments!".to_string());
          }
 
-         let kvps_arc = std::sync::Arc::clone(&kvps);
          let cl = args[1].clone();
+         if cl.parse::<u64>().is_err() {
+             return Err(format!("[ERROR]: Expiry timeout must be a number! Got \"{}\"", cl));
+         }
 
-         tokio::spawn(async move {
-             tokio::time::sleep(tokio::time::Duration::from_secs(cl.parse::<u64>().unwrap())).await;
-             self::del(&mut kvps_arc.lock().unwrap(), vec![args[0].as_str()]).unwrap();
-         });
+         crate::redis_engine::ScheduledExpiry::create(
+             std::time::SystemTime::now(),
+             cl.parse::<u64>().unwrap(),
+             args[0].clone()
+         );
+
+
+         // let kvps_arc = std::sync::Arc::clone(kvps);
+         // let cl = args[1].clone();
+
+         // tokio::spawn(async move {
+         //     tokio::time::sleep(tokio::time::Duration::from_secs(cl.parse::<u64>().unwrap())).await;
+         //     self::del(&mut kvps_arc.lock().unwrap(), vec![args[0].as_str()]).unwrap();
+         // });
 
          Ok(format!("{}", 1))
      }

@@ -1,3 +1,5 @@
+#![allow(clippy::inherent_to_string)]
+
 type IntegerType = i64;
 
 #[derive(Clone)]

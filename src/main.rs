@@ -2,7 +2,7 @@ use my_redis_server::redis_engine;
 use std::io::{Read, Write};
 
 #[tokio::main]
-async fn exec_redis_engine(executor: &redis_engine::Executor, command: String, response: &mut String) {
+async fn exec_redis_engine(executor: &redis_engine::Executor, command: &str, response: &mut String) {
     if executor.setup_properly {
         let resp = executor.exec(command.trim().to_string()).await;
         if let Err(x) = resp {
@@ -31,29 +31,44 @@ fn handle_client(mut stream: std::net::TcpStream) {
         clone.save();
     }));
 
-    let mut data = [0 as u8; 500];
+    let mut data = [0_u8; 500];
 
     // while we don't catch either CTRL+C or CTRL+Z
     while !ctrl_c.load(std::sync::atomic::Ordering::Relaxed) &&
        !ctrl_z.load(std::sync::atomic::Ordering::Relaxed)
     {
         sched.tick();
+
+        {
+            let mut idx = 0;
+
+            for exp in unsafe { &redis_engine::EXPIRY_LIST } {
+                if let Ok(elapsed) = exp.start.elapsed() {
+                    if elapsed.as_secs() >= exp.wait_time {
+                        executor.expire_value(&exp.key).unwrap();
+                        if unsafe { redis_engine::EXPIRY_LIST.len() } > 0 {
+                            unsafe { redis_engine::EXPIRY_LIST.remove(idx); }
+                        }
+                        idx+=1;
+                    }
+                }
+            }
+        }
+
         match stream.read(&mut data) {
             Ok(size) => {
                 if let Ok(command) = String::from_utf8(data[0..size].to_vec()) {
-                    if command.len() == 0 {
+                    if command.is_empty() {
                         continue;
                     }
-
                     let mut engine_response = String::new();
-                    exec_redis_engine(&executor, command, &mut engine_response);
-
-                    stream.write(engine_response.as_bytes()).unwrap();
-
+                    exec_redis_engine(&executor, &command, &mut engine_response);
+                    assert_eq!(stream.write(engine_response.as_bytes()).unwrap(), engine_response.len());
                 } else { continue };
             },
             Err(e) => {
                 eprintln!("[ERROR]: {e}");
+                break;
             }
         }
     }
