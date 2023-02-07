@@ -15,22 +15,30 @@ pub mod kvp {
     pub fn set(kvp: &mut KVPHash, args: Vec<&str>) -> Result {
         // https://redis.io/commands/set/
 
-        if args.len() < 2 {
-            Err("[ERROR]: Too few arguments for \"set\"".to_string())
-        } else if args.len() > 2 {
-            Err("[ERROR]: Too many arguments for \"set\"".to_string())
-        } else {
-            kvp.insert(args[0].to_string(), RedisValue::from_str(args[1]));
+        let mut text = String::new();
 
-            Ok("Ok".to_string())
+        if args.len() < 2 {
+            return Err("[ERROR]: Too few arguments for set".to_string());
+        } else if args.len() > 2 {
+            for i in &args[1..] {
+                text.push_str(i);
+                text.push(' ');
+            }
+            //Err("[ERROR]: Too many arguments for set".to_string())
+        } else {
+            text.push_str(args[1]);
         }
+
+        kvp.insert(args[0].to_string(), RedisValue::from_str(&text));
+
+        Ok("Ok".to_string())
     }
 
     pub fn get(kvp: &mut KVPHash, args: Vec<&str>) -> Result {
         // https://redis.io/commands/get/
 
         if args.len() != 1 {
-            return Err("[ERROR]: \"get\" requires only one argument!".to_string());
+            return Err("[ERROR]: get requires only one argument!".to_string());
         }
 
         if kvp.contains_key(args[0]) {
@@ -48,7 +56,7 @@ pub mod kvp {
         //https://redis.io/commands/keys/
 
         if args.len() != 1 {
-            return Err("[ERROR]: \"key\" requires only one argument!".to_string());
+            return Err("[ERROR]: key requires only one argument!".to_string());
         }
 
         if kvps.contains_key(args[0]) {
@@ -62,7 +70,7 @@ pub mod kvp {
         // https://redis.io/commands/type/
 
         if args.len() != 1 {
-            return Err("[ERROR]: \"key\" requires only one argument!".to_string());
+            return Err("[ERROR]: type requires only one argument!".to_string());
         }
 
         return if kvps.contains_key(args[0]) {
@@ -83,7 +91,7 @@ pub mod kvp {
         // https://redis.io/commands/del/
 
         if args.is_empty() {
-            return Err("[ERROR]: \"del\" requires at least one argument!".to_string());
+            return Err("[ERROR]: del requires at least one argument!".to_string());
         }
 
         let mut affected = 0;
@@ -105,7 +113,7 @@ pub mod kvp {
         // job in a separate thread
 
         if args.is_empty() {
-            return Err("[ERROR]: \"unlink\" requires at least one argument!".to_string());
+            return Err("[ERROR]: unlink requires at least one argument!".to_string());
         }
 
         let affected = std::sync::Arc::new(std::sync::Mutex::new(0));
@@ -135,12 +143,12 @@ pub mod kvp {
          // Set a timeout on key. After the timeout has expired, the key will automatically be deleted.
 
          if args.len() < 2 {
-             return Err("[ERROR]: \"expire\" requires at least two arguments!".to_string());
+             return Err("[ERROR]: expire requires at least two arguments!".to_string());
          }
 
          let cl = args[1].clone();
          if cl.parse::<u64>().is_err() {
-             return Err(format!("[ERROR]: Expiry timeout must be a number! Got \"{}\"", cl));
+             return Err(format!("[ERROR]: Expiry timeout must be a number! Got {}", cl));
          }
 
          crate::redis_engine::ScheduledExpiry::create(
@@ -165,7 +173,7 @@ pub mod kvp {
         // https://redis.io/commands/rename/
 
         if args.len() < 2 {
-            return Err("[ERROR]: \"rename\" requires at least two arguments!".to_string());
+            return Err("[ERROR]: rename requires at least two arguments!".to_string());
         }
 
         let clone = kvps[args[0]].clone();

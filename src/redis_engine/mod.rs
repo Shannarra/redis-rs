@@ -34,11 +34,18 @@ impl ExecutionContext {
 
     fn from_file_contents(text: String) -> Self {
         let mut context = ExecutionContext::new();
-        let val: serde_json::Value = serde_json::from_str(&text).unwrap();
+        let mut key_value_pairs = HashMap::new();
+        let mut lists = HashMap::new();
+        let mut hashes = HashMap::new();
 
-        let key_value_pairs = get_kvps_from_json("key_value_pairs".to_string(), &val);
-        let lists = get_lists_from_json(&val);
-        let hashes = get_hashes_from_json(&val);
+        if let Ok(val) = serde_json::from_str(&text) {
+            key_value_pairs = get_kvps_from_json("key_value_pairs".to_string(), &val);
+            lists           = get_lists_from_json(&val);
+            hashes          = get_hashes_from_json(&val);
+        } else {
+            println!("[ERROR]: file {DUMP_FILE_NAME} has been corrupted.\nHINT: Please delete it and run the program again.");
+            std::process::exit(1);
+        }
 
         context.key_value_pairs = Arc::new(Mutex::new(key_value_pairs));
         context.lists = Arc::new(Mutex::new(lists));
@@ -73,8 +80,9 @@ impl ExecutionContext {
 
         if from_str::<Value>(&final_str).is_ok() {
             // falltru
-        } else {
-            panic!("Data has been corrupted. Cannot save.");
+        } else if kvps.len() != 0 && lists.len() != 0 && hashes.len() != 0 {
+            println!("Data has been corrupted. Cannot save.");
+            std::process::exit(1);
         }
 
         final_str
@@ -101,7 +109,8 @@ pub fn setup_executor(debug_mode: bool) -> Executor {
     let path = path::Path::new(&dump_file_path);
     if !path.exists() {
         if fs::File::create(&dump_file_path).is_err() {
-            eprintln!("[ERROR]: Cannot create a dump file!");
+            eprintln!("[ERROR]: Cannot create a dump file! \nHINT: This can usually be resolved by running the program again.");
+            std::process::exit(1);
         } else {
             let setup_data = r#"{
     "key_value_pairs": {
@@ -210,9 +219,10 @@ impl Executor {
         }
     }
 
-    pub async fn exec(&self, command: String) -> command_execution::Result {
+    pub fn exec(&self, command: String) -> command_execution::Result {
         let mut command_words = command.split(' ');
-        let cmd_name = command_words.next().unwrap();
+        let clone = command_words.next().unwrap().to_lowercase().clone();
+        let cmd_name = clone.as_str();
         let cmd_args = command_words.collect::<Vec<_>>();
 
         match cmd_name {
@@ -223,8 +233,9 @@ impl Executor {
             "llen" | "lrem" | "lindex" | "lpop" | "rpop" | "lpush" | "rpush" | "lset" => {
                 self.exec_list_command(cmd_name, cmd_args)
             }
-            "hget" | "hexists" | "hdel" | "hgetall" | "hkeys" | "hlen" | "hmset" | "hset"
-            | "hvals" => self.exec_hash_command(cmd_name, cmd_args),
+            "hget" | "hexists" | "hdel" | "hgetall" | "hkeys" | "hlen" | "hmset" | "hset" | "hvals" => {
+                self.exec_hash_command(cmd_name, cmd_args)
+            },
             _ => Err(format!("Unknown command \"{cmd_name}\" provided.")),
         }
     }

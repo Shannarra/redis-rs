@@ -9,7 +9,7 @@ pub mod hash {
         // https://redis.io/commands/hget/
 
         if args.len() < 2 {
-            return Err("[ERROR]: At least two arguments required for \"hget\"!".to_string());
+            return Err("[ERROR]: At least two arguments required for hget!".to_string());
         }
 
         let key = args[0];
@@ -28,7 +28,7 @@ pub mod hash {
         // https://redis.io/commands/hexists/
 
         if args.len() < 2 {
-            return Err("[ERROR]: At least two arguments required for \"hexists\"!".to_string());
+            return Err("[ERROR]: At least two arguments required for hexists!".to_string());
         }
 
         let key = args[0];
@@ -47,7 +47,7 @@ pub mod hash {
         // https://redis.io/commands/hdel/
 
         if args.len() < 2 {
-            return Err("[ERROR]: At least two arguments required for \"hdel\"!".to_string());
+            return Err("[ERROR]: At least two arguments required for hdel!".to_string());
         }
 
         let mut affected = 0;
@@ -70,7 +70,7 @@ pub mod hash {
         // https://redis.io/commands/hgetall/
 
         if args.is_empty() {
-            return Err("[ERROR]: At least two arguments required for \"hgetall\"!".to_string());
+            return Err("[ERROR]: At least two arguments required for hgetall!".to_string());
         }
 
         let mut vec = vec![];
@@ -92,7 +92,7 @@ pub mod hash {
         // https://redis.io/commands/hkeys/
 
         if args.is_empty() {
-            return Err("[ERROR]: At least one argument required for \"hkeys\"!".to_string());
+            return Err("[ERROR]: At least one argument required for hkeys!".to_string());
         }
 
         let mut vec = vec![];
@@ -117,7 +117,7 @@ pub mod hash {
         // https://redis.io/commands/hvals/
 
         if args.is_empty() {
-            return Err("[ERROR]: At least one argument required for \"hvals\"!".to_string());
+            return Err("[ERROR]: At least one argument required for hvals!".to_string());
         }
 
         let mut vec = vec![];
@@ -141,7 +141,7 @@ pub mod hash {
         // https://redis.io/commands/hlen/
 
         if args.is_empty() {
-            return Err("[ERROR]: At least one argument required for \"hlen\"!".to_string());
+            return Err("[ERROR]: At least one argument required for hlen!".to_string());
         }
 
         let key = args[0];
@@ -157,7 +157,7 @@ pub mod hash {
         // https://redis.io/commands/hset/
 
         if args.len() < 3 {
-            return Err("[ERROR]: At least three arguments required for \"hset\"!".to_string());
+            return Err("[ERROR]: At least three arguments required for hset!".to_string());
         }
 
         let key = args[0];

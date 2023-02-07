@@ -1,0 +1,28 @@
+{
+	"key_value_pairs": {
+  "newname": "idkman",
+  "name": "Petar",
+  "age": 22,
+  "newtext": "this is some long text that I am inserting ",
+  "text": "thisissometext"
+},
+"lists": {
+  "list2": [
+    "newvalue"
+  ],
+  "list1": [
+    "value1",
+    "value2"
+  ]
+},
+	"hashes": {
+  "hash1": {
+    "name": "Petar",
+    "age": 22
+  },
+  "hash2": {
+    "name": "this is a new hash"
+  }
+}
+
+}

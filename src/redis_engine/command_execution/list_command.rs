@@ -9,7 +9,7 @@ pub mod list {
         // https://redis.io/commands/llen/
 
         if args.len() != 1 {
-            return Err("[ERROR]: \"llen\" accepts only one argument".to_string());
+            return Err("[ERROR]: llen accepts only one argument".to_string());
         }
 
         if !list.contains_key(args[0]) {
@@ -25,7 +25,7 @@ pub mod list {
         // https://redis.io/commands/lpush/
 
         if args.len() < 2 {
-            return Err("[ERROR]: At least two arguments required for \"llen\"!".to_string());
+            return Err("[ERROR]: At least two arguments required for lpush!".to_string());
         }
 
         let mut vec = vec![];
@@ -53,7 +53,7 @@ pub mod list {
         // https://redis.io/commands/rpush/
 
         if args.len() < 2 {
-            return Err("[ERROR]: At least two arguments required for \"llen\"!".to_string());
+            return Err("[ERROR]: At least two arguments required for rpush!".to_string());
         }
 
         let mut vec = vec![];
@@ -76,7 +76,7 @@ pub mod list {
         // https://redis.io/commands/lrem/
 
         if args.len() < 3 {
-            return Err("[ERROR]: At least three arguments required for \"llen\"!".to_string());
+            return Err("[ERROR]: At least three arguments required for lrem!".to_string());
         }
 
         let name = args[0];
@@ -84,7 +84,7 @@ pub mod list {
         let key = args[2];
 
         if args[1].parse::<i32>().is_err() {
-            return Err(format!("Second argument of \"lrem\" MUST be a whole number! Got \"{}\"", args[1]));
+            return Err(format!("Second argument of lrem MUST be a whole number! Got {}", args[1]));
         } else {
             count = args[1].parse::<i32>().unwrap();
         }
@@ -142,7 +142,7 @@ pub mod list {
         // https://redis.io/commands/lindex/
 
         if args.len() < 2 {
-            return Err("[ERROR]: At least two arguments required for \"lindex\"!".to_string());
+            return Err("[ERROR]: At least two arguments required for lindex!".to_string());
         }
 
         let name = args[0];
@@ -176,13 +176,13 @@ pub mod list {
         // https://redis.io/commands/lpop/
 
         if args.is_empty() {
-            return Err("[ERROR]: At least one argument required for \"lpop\"!".to_string());
+            return Err("[ERROR]: At least one argument required for lpop!".to_string());
         }
 
         let v = list.get_mut(args[0]).unwrap();
 
         if v.is_empty() {
-            return Err(format!("[ERROR]: List \"{}\" is empty!", args[0]));
+            return Err(format!("[ERROR]: List {} is empty!", args[0]));
         }
 
         if args.len() > 1 {
@@ -211,13 +211,13 @@ pub mod list {
         // https://redis.io/commands/rpop/
 
         if args.is_empty() {
-            return Err("[ERROR]: At least one argument required for \"rpop\"!".to_string());
+            return Err("[ERROR]: At least one argument required for rpop!".to_string());
         }
 
         let v = list.get_mut(args[0]).unwrap();
 
         if v.is_empty() {
-            return Err(format!("[ERROR]: List \"{}\" is empty!", args[0]));
+            return Err(format!("[ERROR]: List {} is empty!", args[0]));
         }
 
         if args.len() > 1 {
@@ -244,7 +244,7 @@ pub mod list {
          // https://redis.io/commands/lset/
 
          if args.len() < 3 {
-             return Err("[ERROR]: At least three arguments required for \"lset\"!".to_string());
+             return Err("[ERROR]: At least three arguments required for lset!".to_string());
          }
 
          let key     =args[0];
