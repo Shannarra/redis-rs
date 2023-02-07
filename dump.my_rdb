@@ -1,25 +1,24 @@
 {
 	"key_value_pairs": {
-  "age": 22,
-  "hi": "hello",
-  "name3get": "name3"
+  "name": "Petar",
+  "age": 22
 },
 "lists": {
+  "list2": [
+    "newvalue"
+  ],
   "list1": [
     "value1",
     "value2"
-  ],
-  "list2": [
-    "newvalue"
   ]
 },
 	"hashes": {
+  "hash2": {
+    "name": "this is a new hash"
+  },
   "hash1": {
     "age": 22,
     "name": "Petar"
-  },
-  "hash2": {
-    "name": "this is a new hash"
   }
 }
 
